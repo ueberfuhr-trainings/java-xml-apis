@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lib:library xmlns:lib="http://www.example.org/gameLibrary" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.example.org/gameLibrary gameLibrary.xsd ">
+	<lib:game>
+		<lib:title>Elderscrolles IV: Skyrim</lib:title>
+		<lib:genre>RPG</lib:genre>
+		<lib:rating>9</lib:rating>
+		<lib:timePlayed>P8DT18H56M23S</lib:timePlayed>
+		<lib:price>14.99</lib:price>
+	</lib:game>
+</lib:library>

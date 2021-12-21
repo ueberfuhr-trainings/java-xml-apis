@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.example.org/NewXMLSchema"
+        elementFormDefault="qualified" xmlns:c="http://www.example.org/NewXMLSchema">
+
+    <element name="auto" type="c:Auto"/>
+
+    <complexType name="Auto">
+        <sequence>
+            <element name="verbrauch" type="c:Verbrauch"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="Verbrauch">
+        <sequence>
+            <element name="NewElement" type="string"/>
+        </sequence>
+    </complexType>
+</schema>
