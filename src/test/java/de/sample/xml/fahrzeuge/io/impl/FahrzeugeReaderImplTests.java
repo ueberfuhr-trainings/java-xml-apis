@@ -34,7 +34,8 @@ class FahrzeugeReaderImplTests {
             return Stream.of(
               FahrzeugeReaderSaxImpl::new,
               FahrzeugeReaderDomImpl::new,
-              FahrzeugeReaderStaxImpl::new
+              FahrzeugeReaderStaxImpl::new,
+              FahrzeugeReaderJaxbImpl::new
             );
         }
 
