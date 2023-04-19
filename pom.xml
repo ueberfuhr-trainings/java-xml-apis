@@ -11,6 +11,7 @@
         <junit.version>5.9.2</junit.version>
         <assertj.version>3.24.2</assertj.version>
         <lombok.version>1.18.26</lombok.version>
+        <mapstruct.version>1.5.4.Final</mapstruct.version>
         <jakarta.xml-binding.api.version>4.0.0</jakarta.xml-binding.api.version>
         <jakarta.xml-binding.impl.version>4.0.2</jakarta.xml-binding.impl.version>
         <jaxb.output.directory>${project.build.directory}/generated-sources/xjc</jaxb.output.directory>
@@ -49,6 +50,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
@@ -66,6 +72,25 @@
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok-mapstruct-binding</artifactId>
+                                <version>0.2.0</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
