@@ -33,7 +33,8 @@ class FahrzeugeReaderImplTests {
         private Stream<Function<InputStreamSupplier, FahrzeugeReader>> getImplementations() {
             return Stream.of(
               FahrzeugeReaderSaxImpl::new,
-              FahrzeugeReaderDomImpl::new
+              FahrzeugeReaderDomImpl::new,
+              FahrzeugeReaderStaxImpl::new
             );
         }
 

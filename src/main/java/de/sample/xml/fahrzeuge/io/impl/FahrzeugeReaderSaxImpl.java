@@ -101,14 +101,15 @@ public class FahrzeugeReaderSaxImpl extends ReaderImpl implements FahrzeugeReade
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             if (null != this.aktuellerHersteller) {
+                final Hersteller.HerstellerBuilder h = aktuellerHersteller;
                 // wir lesen gerade die Unterelemente des Herstellers
                 // == wir geben die Anweisung, wie nachfolgende Characters verarbeitet werden sollen (2)
                 // Switch Pattern Matching (seit Java 17)
                 this.applyCharacters = switch (qName) {
-                    case "name" -> this.aktuellerHersteller::name;
-                    case "sitz" -> this.aktuellerHersteller::sitz;
-                    case "geschäftsführer" -> this.aktuellerHersteller::geschaeftsfuehrer;
-                    case "gründungsdatum" -> text -> this.aktuellerHersteller.gruendungsdatum(LocalDate.parse(text));
+                    case "name" -> h::name;
+                    case "sitz" -> h::sitz;
+                    case "geschäftsführer" -> h::geschaeftsfuehrer;
+                    case "gründungsdatum" -> text -> h.gruendungsdatum(LocalDate.parse(text));
                     default -> null;
                 };
             } else if ("hersteller".equals(qName)) {
