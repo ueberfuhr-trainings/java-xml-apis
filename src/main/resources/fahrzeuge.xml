@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fahrzeuge xmlns="http://www.deutscherv.de/fahrzeuge">
+	<hersteller id="OPEL">
+		<name>OPEL Automobile GmbH</name>
+		<sitz>Rüsselsheim (Deutschland)</sitz>
+		<geschäftsführer>Florian Huettl</geschäftsführer>
+		<geschäftsführer>Ralf Wangemann</geschäftsführer>
+		<gründungsdatum>1862-01-21</gründungsdatum>
+	</hersteller>
+	<hersteller id="FORD">
+		<name>Ford Motor Company</name>
+		<sitz>Dearborn (USA)</sitz>
+		<geschäftsführer>Jim Farley</geschäftsführer>
+		<gründungsdatum>1903-06-16</gründungsdatum>
+	</hersteller>
+	<fahrzeugtyp id="ASTRA" name="Astra" hersteller="OPEL">
+		<antrieb>Diesel</antrieb>
+		<leistung>
+			<wert>105</wert>
+			<einheit>PS</einheit>
+		</leistung>
+	</fahrzeugtyp>
+	<fahrzeugtyp name="Galaxy" hersteller="FORD">
+		<antrieb>Elektro</antrieb>
+		<leistung>
+			<wert>95</wert>
+			<einheit>kW</einheit>
+		</leistung>
+	</fahrzeugtyp>
+</fahrzeuge>
