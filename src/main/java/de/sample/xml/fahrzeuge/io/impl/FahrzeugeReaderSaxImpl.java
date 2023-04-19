@@ -35,7 +35,12 @@ public class FahrzeugeReaderSaxImpl extends ReaderImpl implements FahrzeugeReade
 
     @Override
     public Optional<Hersteller> getHerstellerById(String id) throws IOException {
-        return Optional.empty();
+        // we always read all hersteller
+        // for big data, we could extend the handler by a predicate to only read out Hersteller with the given id
+        return getHersteller()
+          .stream()
+          .filter(h -> id.equals(h.getId()))
+          .findFirst();
     }
 
     @Override

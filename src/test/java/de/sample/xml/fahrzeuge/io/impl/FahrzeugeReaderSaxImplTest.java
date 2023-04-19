@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,7 +18,7 @@ class FahrzeugeReaderSaxImplTest {
     FahrzeugeReaderSaxImpl impl;
 
     @Test
-    void getHersteller() throws IOException {
+    void shouldReadAllHersteller() throws IOException {
         impl = new FahrzeugeReaderSaxImpl(IN);
         List<Hersteller> result = impl.getHersteller();
         assertThat(result)
@@ -40,4 +41,32 @@ class FahrzeugeReaderSaxImplTest {
               .build()
           );
     }
+
+    @Test
+    void shouldReadSingleHersteller() throws IOException {
+        impl = new FahrzeugeReaderSaxImpl(IN);
+        Optional<Hersteller> result = impl.getHerstellerById("FORD");
+        assertThat(result)
+          .isNotEmpty()
+          .get()
+          .usingRecursiveComparison()
+          .isEqualTo(
+            Hersteller.builder()
+              .id("FORD")
+              .name("Ford Motor Company")
+              .sitz("Dearborn (USA)")
+              .geschaeftsfuehrer("Jim Farley")
+              .gruendungsdatum(LocalDate.of(1903, Month.JUNE, 16))
+              .build()
+          );
+    }
+
+    @Test
+    void shouldReadSingleHerstellerNotFound() throws IOException {
+        impl = new FahrzeugeReaderSaxImpl(IN);
+        Optional<Hersteller> result = impl.getHerstellerById("ABC");
+        assertThat(result)
+          .isEmpty();
+    }
+
 }
