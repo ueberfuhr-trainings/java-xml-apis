@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jaxb:bindings
+        xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb http://jakarta.ee/xml/ns/jaxb/bindingschema_3_0.xsd"
+        jaxb:version="3.0">
+
+    <jaxb:bindings schemaLocation="fahrzeuge.xsd">
+        <jaxb:schemaBindings>
+            <jaxb:package name="de.sample.xml.fahrzeuge.io.impl.jaxb"/>
+        </jaxb:schemaBindings>
+        <jaxb:bindings node="//*[@name='fahrzeugtyp']">
+            <jaxb:property name="fahrzeugtypen"/>
+        </jaxb:bindings>
+    </jaxb:bindings>
+
+</jaxb:bindings>

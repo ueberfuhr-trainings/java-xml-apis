@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://www.samples.de/xml/fahrzeuge"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:f="http://www.samples.de/xml/fahrzeuge">
+
+
+    <element name="fahrzeuge" type="f:Fahrzeuge">
+    	<key name="herstellerId">
+    		<selector xpath="./f:hersteller"/>
+    		<field xpath="@id"></field>
+    	</key>
+    	<keyref name="herstellerIdRef" refer="f:herstellerId">
+    		<selector xpath="./f:fahrzeugtyp"/>
+    		<field xpath="@hersteller"/>
+    	</keyref>
+    </element>
+
+    <complexType name="Fahrzeuge">
+    	<sequence>
+    		<element name="hersteller" type="f:Hersteller"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="fahrzeugtyp" type="f:Fahrzeugtyp" minOccurs="0" maxOccurs="unbounded"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="Hersteller">
+    	<sequence>
+    		<element name="name">
+    			<simpleType>
+    				<restriction base="string">
+    					<minLength value="3"></minLength>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="sitz" type="string"></element>
+    		<element name="geschäftsführer" type="string"
+    			maxOccurs="unbounded">
+    		</element>
+    		<element name="gründungsdatum" type="date" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="id" type="ID" use="required"></attribute>
+    </complexType>
+
+    <complexType name="Fahrzeugtyp">
+    	<sequence>
+    		<element name="antrieb">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="Benzin"></enumeration>
+    					<enumeration value="Diesel"></enumeration>
+    					<enumeration value="Elektro"></enumeration>
+    					<enumeration value="Hybrid"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="leistung" minOccurs="0" type="f:Leistung"></element>
+    	</sequence>
+    	<attribute name="name" type="string" use="required"></attribute>
+    	<attribute name="hersteller" type="IDREF" use="required"></attribute>
+    	<attribute name="id" type="ID" use="optional"></attribute>
+    </complexType>
+    
+    <complexType name="Leistung">
+    	<sequence>
+    		<element name="wert">
+    			<simpleType>
+    				<restriction base="int">
+    					<minExclusive value="0"></minExclusive>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    		<element name="einheit">
+    			<simpleType>
+    				<restriction base="string">
+    					<enumeration value="PS"></enumeration>
+    					<enumeration value="kW"></enumeration>
+    				</restriction>
+    			</simpleType>
+    		</element>
+    	</sequence>
+    </complexType>
+</schema>
