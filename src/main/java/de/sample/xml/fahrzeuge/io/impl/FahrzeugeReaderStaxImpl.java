@@ -6,23 +6,31 @@ import de.sample.xml.fahrzeuge.domain.Hersteller;
 import de.sample.xml.fahrzeuge.io.FahrzeugeReader;
 import de.sample.xml.fahrzeuge.io.InputStreamSupplier;
 import lombok.SneakyThrows;
+import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class FahrzeugeReaderStaxImpl extends ReaderImpl implements FahrzeugeReader {
+public class FahrzeugeReaderStaxImpl extends ValidatingReaderImpl implements FahrzeugeReader {
 
-    public FahrzeugeReaderStaxImpl(InputStreamSupplier inputStreamSupplier) {
-        super(inputStreamSupplier);
+    public FahrzeugeReaderStaxImpl(
+      InputStreamSupplier inputStreamSupplier,
+      InputStreamSupplier schemaInputStreamSupplier
+    ) {
+        super(inputStreamSupplier, schemaInputStreamSupplier);
     }
 
     @Override
@@ -41,7 +49,7 @@ public class FahrzeugeReaderStaxImpl extends ReaderImpl implements FahrzeugeRead
     }
 
     @Override
-    public List<Fahrzeugtyp> getFahrzeugTypen() throws IOException {
+    public List<Fahrzeugtyp> getFahrzeugTypen() throws  IOException {
         return null;
     }
 
@@ -55,12 +63,25 @@ public class FahrzeugeReaderStaxImpl extends ReaderImpl implements FahrzeugeRead
         return null;
     }
 
-    private static <T> InputStreamReadingFunction<T> staxParse(Function<XMLStreamReader, T> fetchData) {
-        return in -> {
+    private <T> InputStreamReadingFunction<T> staxParse(Function<XMLStreamReader, T> fetchData) {
+        return (in, schemaIn) -> {
+
+            // unfortunately, we cannot validate XML during parsing in one pass with StAX
+            // (except we use StreamReaderDelegate, where we need to parse the whole document)
+            // we need to validate before
+            // see https://news.kynosarges.org/2017/01/20/java-stax-tips/
+            try (InputStream inputToValidate = getInputStreamSupplier().get()) {
+                final var sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                final var schema = sf.newSchema(new StreamSource(schemaIn));
+                Validator validator = schema.newValidator();
+                validator.validate(new StreamSource(inputToValidate));
+            } catch (SAXException e) {
+                throw new IOException(e);
+            }
+
             XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+            xmlInputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
             try {
-                xmlInputFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-                xmlInputFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
                 XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(in);
                 try {
                     return fetchData.apply(reader); // read parsed data from handler
@@ -82,6 +103,7 @@ public class FahrzeugeReaderStaxImpl extends ReaderImpl implements FahrzeugeRead
             List<Hersteller> hersteller = new ArrayList<>();
             // aktuell zu lesender Hersteller (Builder Pattern)
             Hersteller.HerstellerBuilder aktuellerHersteller = null;
+            xmlIteration:
             while (reader.hasNext()) {
                 // Switch Pattern Matching (seit Java 17)
                 switch (reader.next()) {
@@ -94,10 +116,18 @@ public class FahrzeugeReaderStaxImpl extends ReaderImpl implements FahrzeugeRead
                         case "geschäftsführer" -> aktuellerHersteller.geschaeftsfuehrer(reader.getElementText());
                         case "gründungsdatum" -> aktuellerHersteller.gruendungsdatum(LocalDate.parse(reader.getElementText()));
                         }
-                    } else if ("hersteller".equals(reader.getName().getLocalPart())) {
-                        // wir beginnen mit dem Lesen eines Herstellers
-                        aktuellerHersteller = Hersteller.builder();
-                        aktuellerHersteller.id(reader.getAttributeValue(null, "id"));
+                    } else {
+                        switch (reader.getName().getLocalPart()) {
+                        case "hersteller" -> {
+                            // wir beginnen mit dem Lesen eines Herstellers
+                            aktuellerHersteller = Hersteller.builder();
+                            aktuellerHersteller.id(reader.getAttributeValue(null, "id"));
+                        }
+                        case "fahrzeugtyp" -> {
+                            // we can finish here
+                            break xmlIteration;
+                        }
+                        }
                     }
                 }
                 case XMLEvent.END_ELEMENT -> {

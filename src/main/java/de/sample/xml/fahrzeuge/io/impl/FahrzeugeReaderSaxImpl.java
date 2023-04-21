@@ -7,13 +7,18 @@ import de.sample.xml.fahrzeuge.io.FahrzeugeReader;
 import de.sample.xml.fahrzeuge.io.InputStreamSupplier;
 import lombok.Getter;
 import org.xml.sax.Attributes;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.ext.DefaultHandler2;
 import org.xml.sax.helpers.DefaultHandler;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,10 +27,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class FahrzeugeReaderSaxImpl extends ReaderImpl implements FahrzeugeReader {
+public class FahrzeugeReaderSaxImpl extends ValidatingReaderImpl implements FahrzeugeReader {
 
-    public FahrzeugeReaderSaxImpl(InputStreamSupplier inputStreamSupplier) {
-        super(inputStreamSupplier);
+    public FahrzeugeReaderSaxImpl(
+      InputStreamSupplier inputStreamSupplier,
+      InputStreamSupplier schemaInputStreamSupplier
+    ) {
+        super(inputStreamSupplier, schemaInputStreamSupplier);
     }
 
     @Override
@@ -59,10 +67,13 @@ public class FahrzeugeReaderSaxImpl extends ReaderImpl implements FahrzeugeReade
     }
 
     private static <T, H extends DefaultHandler> InputStreamReadingFunction<T> saxParse(H handler, Function<H, T> fetchData) {
-        return in -> {
+        return (in, schemaIn) -> {
             SAXParserFactory factory = SAXParserFactory.newInstance();
             try {
-                factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                var sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                var schema = sf.newSchema(new StreamSource(schemaIn));
+                factory.setSchema(schema);
+                factory.setNamespaceAware(true);
                 SAXParser saxParser = factory.newSAXParser();
                 saxParser.parse(in, handler); // parse XML
                 return fetchData.apply(handler); // read parsed data from handler
@@ -139,6 +150,10 @@ public class FahrzeugeReaderSaxImpl extends ReaderImpl implements FahrzeugeReade
             this.applyCharacters = null; // bei leeren Properties notwendig
         }
 
+        @Override
+        public void error(SAXParseException e) throws SAXException {
+            throw e;
+        }
     }
 
 }

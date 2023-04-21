@@ -2,11 +2,7 @@ package de.sample.xml.fahrzeuge.io.impl;
 
 import de.sample.xml.fahrzeuge.domain.Hersteller;
 import de.sample.xml.fahrzeuge.io.FahrzeugeReader;
-import de.sample.xml.fahrzeuge.io.InputStreamSupplier;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 
 import java.io.IOException;
@@ -14,10 +10,9 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Single test class that provides tests for all implementations.
@@ -25,29 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * we can do this as parameterized test here.
  */
 class FahrzeugeReaderImplTests {
-
-    static final InputStreamSupplier IN = () -> FahrzeugeReaderImplTests.class.getResourceAsStream("/fahrzeuge.xml");
-
-    static class FahrzeugeReaderImplementationsProvider implements ArgumentsProvider {
-
-        private Stream<Function<InputStreamSupplier, FahrzeugeReader>> getImplementations() {
-            return Stream.of(
-              FahrzeugeReaderSaxImpl::new,
-              FahrzeugeReaderDomImpl::new,
-              FahrzeugeReaderStaxImpl::new,
-              FahrzeugeReaderJaxbImpl::new
-            );
-        }
-
-        @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
-            return getImplementations()
-              // create instances of the reader implementations
-              .map(f -> f.apply(IN))
-              // make it compatible to JUnit 5
-              .map(Arguments::of);
-        }
-    }
 
     @ParameterizedTest
     @ArgumentsSource(FahrzeugeReaderImplementationsProvider.class)
@@ -99,6 +71,23 @@ class FahrzeugeReaderImplTests {
         Optional<Hersteller> result = impl.getHerstellerById("ABC");
         assertThat(result)
           .isEmpty();
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(FahrzeugeReaderImplementationsProvider.class)
+    @FahrzeugeReaderImplementationsProvider.Xml("""
+      <?xml version="1.0" encoding="UTF-8"?>
+      <f:fahrzeuge xmlns:f="http://www.samples.de/xml/fahrzeuge">
+      	<f:hersteller id="OPEL">
+      		<f:name>OPEL Automobile GmbH</f:name>
+      		<!-- <sitz> is missing -->
+      	</f:hersteller>
+      </f:fahrzeuge>
+      """)
+    void shouldOccurInValidationError(FahrzeugeReader impl) {
+        assertThatThrownBy(impl::getHersteller)
+          // missing <sitz> would otherwise lead to NPE in HerstellerBuilder, if validation is not done
+          .isInstanceOf(IOException.class);
     }
 
 }

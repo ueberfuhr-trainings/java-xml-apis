@@ -11,9 +11,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.SchemaFactory;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -22,10 +25,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-public class FahrzeugeReaderDomImpl extends ReaderImpl implements FahrzeugeReader {
+public class FahrzeugeReaderDomImpl extends ValidatingReaderImpl implements FahrzeugeReader {
 
-    public FahrzeugeReaderDomImpl(InputStreamSupplier inputStreamSupplier) {
-        super(inputStreamSupplier);
+    public FahrzeugeReaderDomImpl(
+      InputStreamSupplier inputStreamSupplier,
+      InputStreamSupplier schemaInputStreamSupplier
+    ) {
+        super(inputStreamSupplier, schemaInputStreamSupplier);
     }
 
     @Override
@@ -57,12 +63,17 @@ public class FahrzeugeReaderDomImpl extends ReaderImpl implements FahrzeugeReade
     }
 
     private static <T> InputStreamReadingFunction<T> domParse(Function<Document, T> fetchData) {
-        return in -> {
+        return (in, schemaIn) -> {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             try {
-                factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+
+                var sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+                var schema = sf.newSchema(new StreamSource(schemaIn));
+                factory.setSchema(schema);
                 factory.setNamespaceAware(true);
                 DocumentBuilder builder = factory.newDocumentBuilder();
+                builder.setErrorHandler(new DefaultErrorHandler() {
+                });
                 Document document = builder.parse(in);
                 return fetchData.apply(document); // read parsed data from handler
             } catch (ParserConfigurationException | SAXException e) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fahrzeuge xmlns="http://www.deutscherv.de/fahrzeuge">
+<fahrzeuge xmlns="http://www.samples.de/xml/fahrzeuge">
 	<hersteller id="OPEL">
 		<name>OPEL Automobile GmbH</name>
 		<sitz>Rüsselsheim (Deutschland)</sitz>

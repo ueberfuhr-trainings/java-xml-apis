@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://www.deutscherv.de/fahrzeuge"
+<schema targetNamespace="http://www.samples.de/xml/fahrzeuge"
 	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
-	xmlns:f="http://www.deutscherv.de/fahrzeuge">
+	xmlns:f="http://www.samples.de/xml/fahrzeuge">
 
 
     <element name="fahrzeuge" type="f:Fahrzeuge">

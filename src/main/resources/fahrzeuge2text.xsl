@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="2.0"
-	xmlns:f="http://www.deutscherv.de/fahrzeuge"
+	xmlns:f="http://www.samples.de/xml/fahrzeuge"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 	<xsl:output method="text" />
 
